@@ -4,7 +4,7 @@ from .models import Job, Application
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from accounts.models import CustomUser
 
 class ApplicationHomePage(APIView):
     def get(self, request, format=None, **kwargs):
@@ -17,12 +17,20 @@ class ApplicationHomePage(APIView):
     def post(self, request, format=None, **kwargs):
         job_id = kwargs.get('id')  # Assuming 'job_id' is a parameter in the URL
         job = Job.objects.get(id=job_id)
-        current_job = Application(job=job)
-        serializer = ApplicationsSerialzier(current_job, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        message = {"Success": "Application has been submitted"}
-        message.update(serializer.data)
+        if request.user.is_authenticated:
+            user = CustomUser.objects.get(email=request.user)
+            print(request.user)
+            current_job = Application.objects.create(job=job, first_name=user.profile.first_name, last_name=user.profile.last_name, email=user.email, cv=user.profile.cv, country=user.profile.country)
+            serialzier = ApplicationsSerialzier(current_job)
+            message = {"Success": "Application has been submitted"}
+            message.update(serializer.data)
+        else:
+            current_job = Application(job=job)
+            serializer = ApplicationsSerialzier(current_job, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            message = {"Success": "Application has been submitted"}
+            message.update(serializer.data)
         return Response(message, status=status.HTTP_201_CREATED)
     
     # def perform_create(self, serializer):

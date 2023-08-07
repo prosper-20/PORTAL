@@ -26,6 +26,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Profile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
     avatar = models.ImageField(default="default2.jpg",upload_to="account_pics", blank=True)
     cv = models.FileField(default="none.jpg", upload_to="applications")
     bio = models.CharField(max_length=200, blank=True)
