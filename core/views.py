@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .serializers import JobSerializer, ApplicationSerialzier
+from .serializers import JobSerializer, ApplicationsSerialzier
 from .models import Job, Application
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,8 +10,28 @@ class ApplicationHomePage(APIView):
     def get(self, request, format=None, **kwargs):
         job = Job.objects.get(id=kwargs.get("id"))
         applications = Application.objects.filter(job=job)
-        serializer = ApplicationSerialzier(applications, many=True)
+        serializer = ApplicationsSerialzier(applications, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+    def post(self, request, format=None, **kwargs):
+        job_id = kwargs.get('job_id')  # Assuming 'job_id' is a parameter in the URL
+        job = Job.objects.get(id=job_id)
+        current_job = Application(job=job)
+        serializer = ApplicationsSerialzier(current_job, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        message = {"Success": "Application has been submitted"}
+        message.update(serializer.data)
+        return Response(message, status=status.HTTP_201_CREATED)
+    
+    # def perform_create(self, serializer):
+        
+    #     job_id = self.kwargs.get("id")
+    #     print(job_id)
+    #     job = Job.objects.get(id=job_id)
+    #     serializer.save(job=job)
+
 
 class JobHomePage(APIView):
     def get(self, request, format=None):
