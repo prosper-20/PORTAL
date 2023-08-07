@@ -38,5 +38,5 @@ class Application(models.Model):
 
 
     def __str__(self):
-        return f"{self.username} application"
+        return f"{self.first_name} application"
     

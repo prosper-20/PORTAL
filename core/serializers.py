@@ -12,4 +12,4 @@ class JobSerializer(serializers.ModelSerializer):
 class ApplicationsSerialzier(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ["username", "email", "cv", "cover_letter", "created"]
+        fields = ["first_name", "last_name", "email", "cv", "country", "cover_letter", "created"]
