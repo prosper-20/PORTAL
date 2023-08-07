@@ -11,9 +11,9 @@ class JobAdmin(admin.ModelAdmin):
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ["job", "username", "created"]
-    list_filter = ["job", "username"]
+    list_display = ["job", "first_name", "created"]
+    list_filter = ["job", "first_name", "last_name"]
     search_fields = ["job"]
-    
+
 
 

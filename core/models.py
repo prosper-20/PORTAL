@@ -19,11 +19,18 @@ class Job(models.Model):
     def __str__(self):
         return self.title
     
-
+COUNTRY_CHOICES = (
+    ('Nigeria', 'Nigeria'),
+    ('Ethopian', 'Ethopia'),
+    ('Germany', 'Germany'),
+    )
 
 class Application(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    username = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    country = models.CharField(max_length=20, choices=COUNTRY_CHOICES)
+    phone_number = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField()
     cv = models.FileField(upload_to="applications")
     cover_letter = models.TextField(blank=True, null=True)

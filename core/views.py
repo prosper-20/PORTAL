@@ -15,7 +15,7 @@ class ApplicationHomePage(APIView):
     
 
     def post(self, request, format=None, **kwargs):
-        job_id = kwargs.get('job_id')  # Assuming 'job_id' is a parameter in the URL
+        job_id = kwargs.get('id')  # Assuming 'job_id' is a parameter in the URL
         job = Job.objects.get(id=job_id)
         current_job = Application(job=job)
         serializer = ApplicationsSerialzier(current_job, data=request.data)
