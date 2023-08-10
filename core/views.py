@@ -5,33 +5,50 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from accounts.models import CustomUser
+from rest_framework.permissions import IsAuthenticated
+from .permissions import CompleteProfilePermission, CanViewJobApplications
+from rest_framework.generics import ListCreateAPIView
 
-class ApplicationHomePage(APIView):
-    def get(self, request, format=None, **kwargs):
-        job = Job.objects.get(id=kwargs.get("id"))
-        applications = Application.objects.filter(job=job)
-        serializer = ApplicationsSerialzier(applications, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+class ApplicationHomePage(ListCreateAPIView):
+    
+    serializer_class = ApplicationsSerialzier
+    permission_classes = [IsAuthenticated, CanViewJobApplications]
+
+    def get_queryset(self):
+        id = self.kwargs.get("id")
+        return Application.objects.filter(job=id)
+
+
+
+# class ApplicationHomePage(APIView):
+#     permission_classes = [IsAuthenticated, CanViewJobApplications]
     
 
-    def post(self, request, format=None, **kwargs):
-        job_id = kwargs.get('id')  # Assuming 'job_id' is a parameter in the URL
-        job = Job.objects.get(id=job_id)
-        if request.user.is_authenticated:
-            user = CustomUser.objects.get(email=request.user)
-            print(request.user)
-            current_job = Application.objects.create(job=job, first_name=user.profile.first_name, last_name=user.profile.last_name, email=user.email, cv=user.profile.cv, country=user.profile.country)
-            serializer = ApplicationsSerialzier(current_job)
-            message = {"Success": "Application has been submitted"}
-            message.update(serializer.data)
-        else:
-            current_job = Application(job=job)
-            serializer = ApplicationsSerialzier(current_job, data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            message = {"Success": "Application has been submitted"}
-            message.update(serializer.data)
-        return Response(message, status=status.HTTP_201_CREATED)
+#     def get(self, request, format=None, **kwargs):
+#         job = Job.objects.get(id=kwargs.get("id"))
+#         applications = Application.objects.filter(job=job)
+#         serializer = ApplicationsSerialzier(applications, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+#     def post(self, request, format=None, **kwargs):
+#         job_id = kwargs.get('id')  # Assuming 'job_id' is a parameter in the URL
+#         job = Job.objects.get(id=job_id)
+#         if request.user.is_authenticated:
+#             user = CustomUser.objects.get(email=request.user)
+#             print(request.user)
+#             current_job = Application.objects.create(job=job, first_name=user.profile.first_name, last_name=user.profile.last_name, email=user.email, cv=user.profile.cv, country=user.profile.country)
+#             serializer = ApplicationsSerialzier(current_job)
+#             message = {"Success": "Application has been submitted"}
+#             message.update(serializer.data)
+#         else:
+#             current_job = Application(job=job)
+#             serializer = ApplicationsSerialzier(current_job, data=request.data)
+#             serializer.is_valid(raise_exception=True)
+#             serializer.save()
+#             message = {"Success": "Application has been submitted"}
+#             message.update(serializer.data)
+#         return Response(message, status=status.HTTP_201_CREATED)
     
     # def perform_create(self, serializer):
         
