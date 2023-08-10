@@ -21,7 +21,7 @@ class ApplicationHomePage(APIView):
             user = CustomUser.objects.get(email=request.user)
             print(request.user)
             current_job = Application.objects.create(job=job, first_name=user.profile.first_name, last_name=user.profile.last_name, email=user.email, cv=user.profile.cv, country=user.profile.country)
-            serialzier = ApplicationsSerialzier(current_job)
+            serializer = ApplicationsSerialzier(current_job)
             message = {"Success": "Application has been submitted"}
             message.update(serializer.data)
         else:

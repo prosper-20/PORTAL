@@ -22,6 +22,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+COUNTRY_CHOICES = (
+    ('Nigeria', 'Nigeria'),
+    ('Ethopian', 'Ethopia'),
+    ('Germany', 'Germany'),
+    )
 
 
 class Profile(models.Model):
@@ -31,7 +36,7 @@ class Profile(models.Model):
     avatar = models.ImageField(default="default2.jpg",upload_to="account_pics", blank=True)
     cv = models.FileField(default="none.jpg", upload_to="applications")
     bio = models.CharField(max_length=200, blank=True)
-    location = models.CharField(max_length=200)
+    country = models.CharField(max_length=20, choices=COUNTRY_CHOICES)
     phone_number = models.CharField(max_length=11)
     is_complete = models.BooleanField(default=False)
     otp = models.CharField(max_length=6, null=True, blank=True)
