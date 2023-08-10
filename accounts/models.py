@@ -43,6 +43,8 @@ class Profile(models.Model):
 
 
     def __str__(self):
+        if self.first_name:
+            return f"{self.first_name} profile" 
         return f"{self.user.email} profile"
 
     @property
