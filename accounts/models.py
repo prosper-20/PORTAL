@@ -8,7 +8,7 @@ import string
 import random, os
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField(max_length=100, blank=True, null=True)
+    username = models.CharField(max_length=100)
     email = models.EmailField(_("email address"), unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
