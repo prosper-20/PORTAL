@@ -87,6 +87,49 @@ class JobHomePage(APIView):
             message.update(new_job.data)
             return Response(message, status=status.HTTP_201_CREATED)
         return Response(new_job.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class JobApplicationPage(APIView):
+    def get(self, request, format=None, **kwargs):
+        slug = kwargs.get("slug")
+        id = kwargs.get("id")
+        
+        try:
+            if id:
+                job = Job.objects.get(id=id)
+            elif slug:
+                job = Job.objects.get(slug=slug)
+            elif job and slug:
+                job = Job.objects.get(id=id, slug=slug)
+        except Job.DoesNotExist:
+                return Response("Job not found", status=status.HTTP_404_NOT_FOUND)
+        serializer_context = {
+            'request': request,
+        }
+        
+        serializer = JobSerializer(job, context=serializer_context)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, format=None, **kwargs):
+        job_id = kwargs.get('id')  # Assuming 'job_id' is a parameter in the URL
+        job = Job.objects.get(id=job_id)
+        print(request.user)
+        if request.user.is_authenticated:
+            user = CustomUser.objects.get(email=request.user)
+            print(request.user)
+            current_job = Application.objects.create(job=job, first_name=user.profile.first_name, last_name=user.profile.last_name, email=user.email, cv=user.profile.cv, country=user.profile.country)
+            serializer = ApplicationsSerialzier(current_job)
+            message = {"Success": "Application has been submitted"}
+            message.update(serializer.data)
+        else:
+            current_job = Application(job=job)
+            serializer = ApplicationsSerialzier(current_job, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            message = {"Success": "Application has been submitted"}
+            message.update(serializer.data)
+        return Response(message, status=status.HTTP_201_CREATED)
+
             
     
 
