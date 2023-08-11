@@ -8,6 +8,8 @@ from accounts.models import CustomUser
 from rest_framework.permissions import IsAuthenticated
 from .permissions import CompleteProfilePermission, CanViewJobApplications
 from rest_framework.generics import ListCreateAPIView
+from rest_framework import permissions
+
 
 class ApplicationHomePage(ListCreateAPIView):
     
@@ -21,7 +23,12 @@ class ApplicationHomePage(ListCreateAPIView):
 
 
 # class ApplicationHomePage(APIView):
-#     permission_classes = [IsAuthenticated, CanViewJobApplications]
+#     # permission_classes = [IsAuthenticated, CanViewJobApplications]
+#     def get_permissions(self):
+#         return (permissions.IsAuthenticated(), CanViewJobApplications())
+
+#     # def post_permissions(self):
+#     #     return [IsAuthenticated, CompleteProfilePermission()]
     
 
 #     def get(self, request, format=None, **kwargs):
