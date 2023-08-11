@@ -81,12 +81,10 @@ class JobHomePage(APIView):
             return Response({"Message": "Only users who are employers can post jobs"}, status=status.HTTP_401_UNAUTHORIZED)
         
         new_job = JobSerializer(data=request.data)
-        response_dict = {}
         if new_job.is_valid():
             new_job.save(raise_exception=True)
             message = {"Success": "Job has been created successfully!!"}
             message.update(new_job.data)
-            response_dict.update(message)
             return Response(message, status=status.HTTP_201_CREATED)
         return Response(new_job.errors, status=status.HTTP_400_BAD_REQUEST)
             
