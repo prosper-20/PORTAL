@@ -74,6 +74,23 @@ class JobHomePage(APIView):
         serializer = JobSerializer(all_jobs, many=True, context=serializer_context)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    def post(self, request, format=None):
+        if not request.user.is_authenticated:
+            return Response({"Message": "Login to create a job posting"}, status=status.HTTP_401_UNAUTHORIZED)
+        elif request.user.profile.is_employer == False:
+            return Response({"Message": "Only users who are employers can post jobs"}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        new_job = JobSerializer(data=request.data)
+        response_dict = {}
+        if new_job.is_valid():
+            new_job.save(raise_exception=True)
+            message = {"Success": "Job has been created successfully!!"}
+            message.update(new_job.data)
+            response_dict.update(message)
+            return Response(message, status=status.HTTP_201_CREATED)
+        return Response(new_job.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+    
 
 class JobDetailPage(APIView):
     def get(self, request, format=None, **kwargs):
