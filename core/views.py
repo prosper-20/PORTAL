@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .serializers import JobSerializer, ApplicationsSerialzier
 from .models import Job, Application
 from rest_framework.views import APIView
@@ -112,4 +112,50 @@ class JobDetailPage(APIView):
         
         serializer = JobSerializer(job, context=serializer_context)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, format=None, **kwargs):
+        slug = kwargs.get("slug")
+        id = kwargs.get("id")
+        
+        try:
+            if id:
+                job = Job.objects.get(id=id)
+            elif slug:
+                job = Job.objects.get(slug=slug)
+            elif job and slug:
+                job = Job.objects.get(id=id, slug=slug)
+        except Job.DoesNotExist:
+                return Response("Job not found", status=status.HTTP_404_NOT_FOUND)
+        
+        if request.user != job.posted_by:
+            return Response({"Error": "You can't update a job"}, status=status.HTTP_401_UNAUTHORIZED)
+        serializer = JobSerializer(job, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            message = {"Success": "Post update successful"}
+            message.update(serializer.data)
+            return Response(message, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, format=None, **kwargs):
+        slug = kwargs.get("slug")
+        id = kwargs.get("id")
+        
+        try:
+            if id:
+                job = get_object_or_404(Job, id=id)
+            elif slug:
+                job = get_object_or_404(slug=slug)
+            elif job and slug:
+                job = get_object_or_404(id=id, slug=slug)
+        except Job.DoesNotExist:
+                return Response("Job not found", status=status.HTTP_404_NOT_FOUND)
+        
+        if request.user != job.posted_by:
+            return Response({"Error": "You can't delete this job"}, status=status.HTTP_401_UNAUTHORIZED)
+        job.delete()
+        return Response({"Success": "Post deletion successful"})
+        
+        
+
             

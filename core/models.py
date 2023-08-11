@@ -9,7 +9,7 @@ class Job(models.Model):
     description = models.TextField(blank=True, null=True)
     requirements = models.TextField(blank=True, null=True)
     responsilbilities = models.TextField(blank=True, null=True)
-    company_name = models.CharField(max_length=100, blank=True, null=True)
+    company_name = models.CharField(max_length=100)
     posted_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     date_posted = models.DateField(auto_now_add=True)
     date_updated = models.DateField(auto_now=True)

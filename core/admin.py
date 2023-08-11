@@ -3,7 +3,7 @@ from .models import Job, Application
 
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    prepopulated_fields = {"slug": ("title",)}
+    prepopulated_fields = {"slug": ("title", "company_name")}
     list_display = ["title", "company_name", "salary"]
     list_filter = ["salary", "location", "expired"]
     list_editable = ["salary"]
