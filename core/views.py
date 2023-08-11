@@ -81,12 +81,11 @@ class JobHomePage(APIView):
             return Response({"Message": "Only users who are employers can post jobs"}, status=status.HTTP_401_UNAUTHORIZED)
         
         new_job = JobSerializer(data=request.data)
-        if new_job.is_valid():
-            new_job.save(raise_exception=True)
-            message = {"Success": "Job has been created successfully!!"}
-            message.update(new_job.data)
-            return Response(message, status=status.HTTP_201_CREATED)
-        return Response(new_job.errors, status=status.HTTP_400_BAD_REQUEST)
+        new_job.is_valid(raise_exception=True)
+        
+        message = {"Success": "Job has been created successfully!!"}
+        message.update(new_job.data)
+        return Response(message, status=status.HTTP_201_CREATED)
 
 
 class JobApplicationPage(APIView):
@@ -113,7 +112,8 @@ class JobApplicationPage(APIView):
     def post(self, request, format=None, **kwargs):
         job_id = kwargs.get('id')  # Assuming 'job_id' is a parameter in the URL
         job = Job.objects.get(id=job_id)
-        print(request.user)
+        if job.expired == True:
+            return Response({"Message": "OOPS!!, Applications are no longer being accepted"}, status=status.HTTP_410_GONE)
         if request.user.is_authenticated:
             user = CustomUser.objects.get(email=request.user)
             print(request.user)
