@@ -5,11 +5,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from accounts.models import CustomUser
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
 from .permissions import CompleteProfilePermission, CanViewJobApplications
 from rest_framework.generics import ListCreateAPIView
 from rest_framework import permissions
 from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import HasCompleteProfile
 
 class ApplicationHomePage(ListCreateAPIView):
@@ -92,10 +93,11 @@ class ApplicationHomePage(ListCreateAPIView):
 
 class JobHomePage(ListCreateAPIView):
     queryset = Job.objects.all()
-    permission_classes = [IsAuthenticated, HasCompleteProfile]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     serializer_class = JobSerializer
-    filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ["company_name", "title", "location"]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['company_name', 'expired']
 
     def perform_create(self, serializer):
         serializer.save(posted_by=self.request.user)
