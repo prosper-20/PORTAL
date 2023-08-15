@@ -39,7 +39,7 @@ class HasCompleteProfile(permissions.BasePermission):
     
     def has_permission(self, request, view):
         user = request.user
-        if user.is_authenticated and user.profile.is_employer:
+        if user.profile.is_employer:
             return True
         self.message = "You must have a complete profile to create a post."
         return False

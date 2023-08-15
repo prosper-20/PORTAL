@@ -93,7 +93,7 @@ class ApplicationHomePage(ListCreateAPIView):
 
 class JobHomePage(ListCreateAPIView):
     queryset = Job.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, HasCompleteProfile]
     serializer_class = JobSerializer
     search_fields = ["company_name", "title", "location"]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
