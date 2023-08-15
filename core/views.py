@@ -9,7 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import CompleteProfilePermission, CanViewJobApplications
 from rest_framework.generics import ListCreateAPIView
 from rest_framework import permissions
-
+from rest_framework.filters import SearchFilter, OrderingFilter
+from .permissions import HasCompleteProfile
 
 class ApplicationHomePage(ListCreateAPIView):
     
@@ -65,30 +66,44 @@ class ApplicationHomePage(ListCreateAPIView):
     #     serializer.save(job=job)
 
 
-class JobHomePage(APIView):
-    def get(self, request, format=None):
-        serializer_context = {
-            'request': request,
-        }
-        all_jobs = Job.objects.all()
-        serializer = JobSerializer(all_jobs, many=True, context=serializer_context)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class JobHomePage(APIView):
     
-    def post(self, request, format=None):
-        if not request.user.is_authenticated:
-            return Response({"Message": "Login to create a job posting"}, status=status.HTTP_401_UNAUTHORIZED)
-        elif request.user.profile.is_employer == False:
-            return Response({"Message": "Only users who are employers can post jobs"}, status=status.HTTP_401_UNAUTHORIZED)
+#     def get(self, request, format=None):
+#         serializer_context = {
+#             'request': request,
+#         }
+#         all_jobs = Job.objects.all()
+#         serializer = JobSerializer(all_jobs, many=True, context=serializer_context)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+#     def post(self, request, format=None):
+#         if not request.user.is_authenticated:
+#             return Response({"Message": "Login to create a job posting"}, status=status.HTTP_401_UNAUTHORIZED)
+#         elif request.user.profile.is_employer == False:
+#             return Response({"Message": "Only users who are employers can post jobs"}, status=status.HTTP_401_UNAUTHORIZED)
         
-        new_job = JobSerializer(data=request.data)
-        new_job.is_valid(raise_exception=True)
+#         new_job = JobSerializer(data=request.data)
+#         new_job.is_valid(raise_exception=True)
         
-        message = {"Success": "Job has been created successfully!!"}
-        message.update(new_job.data)
-        return Response(message, status=status.HTTP_201_CREATED)
+#         message = {"Success": "Job has been created successfully!!"}
+#         message.update(new_job.data)
+#         return Response(message, status=status.HTTP_201_CREATED)
+
+
+class JobHomePage(ListCreateAPIView):
+    queryset = Job.objects.all()
+    permission_classes = [IsAuthenticated, HasCompleteProfile]
+    serializer_class = JobSerializer
+    filter_backends = [SearchFilter, OrderingFilter]
+    search_fields = ["company_name", "title", "location"]
+
+    def perform_create(self, serializer):
+        serializer.save(posted_by=self.request.user)
+        
 
 
 class JobApplicationPage(APIView):
+    
     def get(self, request, format=None, **kwargs):
         slug = kwargs.get("slug")
         id = kwargs.get("id")

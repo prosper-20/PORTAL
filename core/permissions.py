@@ -29,4 +29,18 @@ class CanViewJobApplications(permissions.BasePermission):
         job_id = view.kwargs.get('id')  # Retrieve job ID from the URL'
         job = Job.objects.get(id=job_id)  # Replace with your model and query logic
         return job.posted_by == request.user
+    
+
+
+class HasCompleteProfile(permissions.BasePermission):
+    """
+    Custom permission to only allow users with a complete profile to create a post.
+    """
+    
+    def has_permission(self, request, view):
+        user = request.user
+        if user.is_authenticated and user.profile.is_employer:
+            return True
+        self.message = "You must have a complete profile to create a post."
+        return False
 
