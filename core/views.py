@@ -93,11 +93,17 @@ class ApplicationHomePage(ListCreateAPIView):
 
 class JobHomePage(ListCreateAPIView):
     queryset = Job.objects.all()
-    permission_classes = [IsAuthenticatedOrReadOnly, HasCompleteProfile]
+    # permission_classes = [IsAuthenticatedOrReadOnly, HasCompleteProfile]
     serializer_class = JobSerializer
     search_fields = ["company_name", "title", "location"]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['company_name', 'expired']
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [IsAuthenticatedOrReadOnly()]
+        else:
+            return [HasCompleteProfile()]
 
     def perform_create(self, serializer):
         serializer.save(posted_by=self.request.user)
