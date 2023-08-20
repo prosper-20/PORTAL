@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import CustomUser, Profile
+from django.contrib.auth.hashers import make_password
 
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,7 +41,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         if password != password2:
             raise serializers.ValidationError({"Response": "Both passwords must match"})
-        user.set_password(password)
+        user.set_password(make_password(password))
         user.save()
         return user
     
