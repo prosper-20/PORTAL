@@ -12,6 +12,7 @@ from rest_framework import permissions
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import HasCompleteProfile
+from rest_framework.pagination import PageNumberPagination
 
 class ApplicationHomePage(ListCreateAPIView):
     
@@ -97,6 +98,7 @@ class JobHomePage(ListCreateAPIView):
     search_fields = ["company_name", "title", "location"]
     filter_backends = [SearchFilter, OrderingFilter]
     filterset_fields = ['company_name', 'expired']
+    pagination_class = PageNumberPagination
 
     def get_permissions(self):
         if self.request.method == 'GET':
