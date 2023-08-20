@@ -13,3 +13,5 @@ class SignUpView(APIView):
         message = {"Success": "Account creation successful"}
         message.update(serializer.data)
         return Response(message, status=status.HTTP_201_CREATED)
+
+# class EmployerSignUp(APIView):
