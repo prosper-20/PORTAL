@@ -11,6 +11,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
     class Meta:
         model = Profile
         fields =["user", "first_name", "last_name", "is_employer"]
