@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import CustomUser, Profile
 from django.contrib.auth.hashers import make_password
 
+from django.contrib.auth import authenticate
+
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -12,6 +14,24 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields =["user", "first_name", "last_name", "is_employer"]
+
+
+class UserLoginSerializer(serializers.Serializer):
+    """
+    Serializer class to authenticate users with email and password.
+    """
+
+    email = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+
+    def validate(self, data):
+        print(data)
+        user = authenticate(**data)
+        print(user)
+        if user and user.is_active:
+            return user
+        raise serializers.ValidationError()
 
 
 

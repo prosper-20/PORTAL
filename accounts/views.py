@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .serializers import (UserRegistrationSerializer, 
                           EmployerRegistrationSerializer,
                           CustomUserSerializer,
+                          UserLoginSerializer,
                           ProfileSerializer)
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,6 +10,28 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import CustomUser
+from rest_framework.permissions import AllowAny
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.generics import GenericAPIView
+
+class UserLoginAPIView(GenericAPIView):
+    """
+    An endpoint to authenticate existing users using their email and password.
+    """
+
+    permission_classes = (AllowAny,)
+    serializer_class = UserLoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data
+        serializer = CustomUserSerializer(user)
+        token = RefreshToken.for_user(user)
+        data = serializer.data
+        data["tokens"] = {"refresh": str(token), "access": str(token.access_token)}
+        return Response(data, status=status.HTTP_200_OK)
 
 class SignUpView(APIView):
     def post(self, request, format=None):
