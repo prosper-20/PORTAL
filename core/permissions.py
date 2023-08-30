@@ -41,6 +41,6 @@ class HasCompleteProfile(permissions.BasePermission):
         user = request.user
         if user.profile.is_employer:
             return True
-        self.message = "You must be an employer to create a post."
+        self.message = "You must be an employer to post a job opening."
         return False
 
