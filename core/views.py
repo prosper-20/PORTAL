@@ -15,6 +15,10 @@ from .permissions import HasCompleteProfile
 from rest_framework.pagination import PageNumberPagination
 
 class ApplicationHomePage(ListCreateAPIView):
+    '''
+    Allows the employer to view all apllications for 
+    a particular job listing
+    '''
     
     serializer_class = ApplicationsSerialzier
     permission_classes = [IsAuthenticated, CanViewJobApplications]
@@ -133,26 +137,41 @@ class JobApplicationPage(APIView):
         
         serializer = JobSerializer(job, context=serializer_context)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def has_user_applied_for_job(self, user_email, job_id):
+        application = Application.objects.filter(email=user_email, job_id=job_id).first()
+        return application is not None
 
     def post(self, request, format=None, **kwargs):
         job_id = kwargs.get('id')  # Assuming 'job_id' is a parameter in the URL
         job = Job.objects.get(id=job_id)
         if job.expired == True:
             return Response({"Message": "OOPS!!, Applications are no longer being accepted"}, status=status.HTTP_410_GONE)
-        if request.user.is_authenticated:
+        if request.user.is_authenticated and request.user.profile.is_complete:
             user = CustomUser.objects.get(email=request.user)
             print(request.user)
-            current_job = Application.objects.create(job=job, first_name=user.profile.first_name, last_name=user.profile.last_name, email=user.email, cv=user.profile.cv, country=user.profile.country)
-            serializer = ApplicationsSerialzier(current_job)
-            message = {"Success": "Application has been submitted"}
-            message.update(serializer.data)
+            has_applied = self.has_user_applied_for_job(request.user, job_id)
+
+            if has_applied:
+                return Response({"Info":"You have already applied for this job!"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                print(request.user)
+                current_job = Application.objects.create(job=job, first_name=user.profile.first_name, last_name=user.profile.last_name, email=user.email, cv=user.profile.cv, country=user.profile.country)
+                serializer = ApplicationsSerialzier(current_job)
+                message = {"Success": "Application has been submitted"}
+                message.update(serializer.data)
         else:
             current_job = Application(job=job)
             serializer = ApplicationsSerialzier(current_job, data=request.data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
-            message = {"Success": "Application has been submitted"}
-            message.update(serializer.data)
+            has_applied = self.has_user_applied_for_job(serializer.validated_data["email"], job_id)
+
+            if has_applied:
+                return Response({"Info":"You have already applied for this job!"}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                serializer.save()
+                message = {"Success": "Application has been submitted"}
+                message.update(serializer.data)
         return Response(message, status=status.HTTP_201_CREATED)
 
             

@@ -1,8 +1,9 @@
 from django.db.models.signals import post_save
 from .models import CustomUser, Profile
 from django.dispatch import receiver
-
-
+from core.models import Application
+from django.conf import settings
+from django.core.mail import send_mail
 
 @receiver(post_save, sender=CustomUser)
 def create_profile(sender, instance, created, **kwargs):
@@ -19,7 +20,7 @@ def save_profile(sender, instance, **kwargs):
 def send_application_notification(sender, instance, created, **kwargs):
     if created:
         job = instance.job
-        employer_email = job.employer.email  # Adjust this according to your model structure
+        employer_email = job.posted_by.email  # Adjust this according to your model structure
         subject = f"New Application for {job.title}"
         message = f"A new application has been submitted for the job '{job.title}'."
         from_email = settings.DEFAULT_FROM_EMAIL  # Set your default sending email
